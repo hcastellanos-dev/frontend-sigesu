@@ -24,6 +24,7 @@ export default function EditProductoPage() {
     descripcion: "",
     id_categoria: "",
     id_proveedor: "",
+    id_usuario: null as number | null, // Preservamos la autoría del producto
     unidad_medida: "PZA",
     cantidad_disponible: 0,
     cantidad_minima: 0,
@@ -51,11 +52,11 @@ export default function EditProductoPage() {
         ]);
 
         const p = resProd.data;
-        // Formatear fecha para el input type="date"
         const fechaCad = p.fecha_caducidad ? new Date(p.fecha_caducidad).toISOString().split('T')[0] : "";
 
         setFormData({
           ...p,
+          id_usuario: p.id_usuario ?? null, // Retenemos el id_usuario existente
           descripcion: p.descripcion || "",
           id_categoria: p.id_categoria?.toString() || "",
           id_proveedor: p.id_proveedor?.toString() || "",
@@ -86,8 +87,6 @@ export default function EditProductoPage() {
       setSaving(true);
       setError("");
       
-      // LOGICA CORRECTA: Extraemos solo campos planos para el DTO
-      // Esto evita enviar objetos anidados (categoria, proveedor) que causan el Error 400
       const payload = {
         sku: formData.sku || null,
         codigo_barra: formData.codigo_barra || null,
@@ -95,6 +94,7 @@ export default function EditProductoPage() {
         descripcion: formData.descripcion || null,
         id_categoria: parseInt(formData.id_categoria),
         id_proveedor: parseInt(formData.id_proveedor),
+        id_usuario: formData.id_usuario ? Number(formData.id_usuario) : null, // Mantenemos la relación en la actualización
         unidad_medida: formData.unidad_medida,
         cantidad_disponible: parseInt(formData.cantidad_disponible.toString()),
         cantidad_minima: parseInt(formData.cantidad_minima.toString()),
@@ -113,6 +113,7 @@ export default function EditProductoPage() {
 
       await api.patch(`/productos/${id}`, payload);
       router.push("/dashboard/productos");
+      router.refresh();
     } catch (err: any) {
       const msg = err.response?.data?.message || "No se pudieron guardar los cambios.";
       setError(Array.isArray(msg) ? msg.join(", ") : msg);
@@ -134,7 +135,7 @@ export default function EditProductoPage() {
       <div className="flex justify-between items-center">
         <div>
           <button onClick={() => router.back()} className="flex items-center gap-2 text-indigo-600 font-bold hover:gap-3 transition-all mb-2">
-            <ArrowLeft size={20} /> Volver al inventario
+            <ArrowLeft size={20} /> Volver
           </button>
           <h1 className="text-3xl font-black text-slate-800 flex items-center gap-3">
              Editar Activo: <span className="text-indigo-600 font-mono">{formData.sku || "S/N"}</span>
@@ -307,7 +308,7 @@ export default function EditProductoPage() {
             onClick={() => router.push("/dashboard/productos")} 
             className="px-8 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all"
           >
-            Cancelar y salir
+            Cancelar
           </button>
           <button 
             type="submit" 
@@ -321,7 +322,7 @@ export default function EditProductoPage() {
               </>
             ) : (
               <>
-                <Save size={20} /> Actualizar Producto
+                <Save size={20} /> Guardar Cambios
               </>
             )}
           </button>

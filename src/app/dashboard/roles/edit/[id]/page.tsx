@@ -92,7 +92,7 @@ export default function EditRolPage({ params }: { params: Promise<{ id: string }
             onClick={() => router.back()} 
             className="flex items-center gap-2 text-indigo-600 font-bold hover:gap-3 transition-all mb-2"
           >
-            <ArrowLeft size={20} /> Volver a la lista
+            <ArrowLeft size={20} /> Volver
           </button>
           <h1 className="text-3xl font-black text-slate-800 flex items-center gap-3">
             Editar Rol: <span className="text-indigo-600 font-mono">{formData.nombre || "..."}</span>

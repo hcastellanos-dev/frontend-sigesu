@@ -211,7 +211,7 @@ export default function EditValePage({ params }: { params: Promise<{ id: string 
       <div className="flex justify-between items-center">
         <div>
           <button onClick={() => router.back()} className="flex items-center gap-2 text-indigo-600 font-bold hover:gap-3 transition-all mb-2">
-            <ArrowLeft size={20} /> Volver a la lista
+            <ArrowLeft size={20} /> Volver
           </button>
           <h1 className="text-3xl font-black text-slate-800 flex items-center gap-3">
             Editar Vale: <span className="text-indigo-600 font-mono">#{id_referencia}</span>
@@ -374,7 +374,7 @@ export default function EditValePage({ params }: { params: Promise<{ id: string 
         <div className="flex flex-col md:flex-row justify-end gap-4 pb-12">
           <button type="button" onClick={() => router.push("/dashboard/vales")} 
             className="px-8 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">
-            Descartar cambios
+            Cancelar
           </button>
           <button type="submit" disabled={saving} 
             className="px-12 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black shadow-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50">

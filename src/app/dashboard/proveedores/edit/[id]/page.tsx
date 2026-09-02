@@ -97,7 +97,7 @@ export default function EditProveedorPage({ params }: { params: Promise<{ id: st
             onClick={() => router.back()} 
             className="flex items-center gap-2 text-indigo-600 font-bold hover:gap-3 transition-all mb-2"
           >
-            <ArrowLeft size={20} /> Volver al directorio
+            <ArrowLeft size={20} /> Volver
           </button>
           <h1 className="text-3xl font-black text-slate-800 flex items-center gap-3">
             Editar Proveedor: <span className="text-indigo-600">{formData.nombre || "..."}</span>
@@ -217,7 +217,7 @@ export default function EditProveedorPage({ params }: { params: Promise<{ id: st
             onClick={() => router.push("/dashboard/proveedores")} 
             className="px-8 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all"
           >
-            Cancelar y salir
+            Cancelar
           </button>
           <button 
             type="submit" 
@@ -231,7 +231,7 @@ export default function EditProveedorPage({ params }: { params: Promise<{ id: st
               </>
             ) : (
               <>
-                <Save size={20} /> Actualizar Proveedor
+                <Save size={20} /> Guardar Cambios
               </>
             )}
           </button>

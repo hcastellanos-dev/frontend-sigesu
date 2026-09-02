@@ -14,6 +14,7 @@ export default function CreateProductoPage() {
   const [saving, setSaving] = useState(false);
   const [categorias, setCategorias] = useState([]);
   const [proveedores, setProveedores] = useState([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
@@ -40,6 +41,16 @@ export default function CreateProductoPage() {
   });
 
   useEffect(() => {
+    // Recuperar el usuario autenticado del localStorage
+    const userStorage = localStorage.getItem("user");
+    if (userStorage) {
+      try {
+        setCurrentUser(JSON.parse(userStorage));
+      } catch (e) {
+        console.error("Error al parsear el usuario autenticado:", e);
+      }
+    }
+
     const fetchCatalogos = async () => {
       try {
         setLoading(true);
@@ -68,10 +79,14 @@ export default function CreateProductoPage() {
     try {
       setSaving(true);
       setError("");
+
+      // Extraer id_usuario del estado local
+      const id_usuario = currentUser?.id_usuario ? Number(currentUser.id_usuario) : null;
       
       // Transformación de datos para cumplir con el esquema (Prisma/PostgreSQL)
       const payload = {
         ...formData,
+        id_usuario, // Se asigna explícitamente el usuario creador
         sku: formData.sku || null,
         codigo_barra: formData.codigo_barra || null,
         id_categoria: parseInt(formData.id_categoria),
@@ -111,7 +126,7 @@ export default function CreateProductoPage() {
       <div className="flex justify-between items-center">
         <div>
           <button onClick={() => router.back()} className="flex items-center gap-2 text-indigo-600 font-bold hover:gap-3 transition-all mb-2">
-            <ArrowLeft size={20} /> Volver al inventario
+            <ArrowLeft size={20} /> Volver
           </button>
           <h1 className="text-3xl font-black text-slate-800 flex items-center gap-3">
             <PlusCircle className="text-indigo-600" size={32} /> Registrar Nuevo Producto
@@ -288,7 +303,7 @@ export default function CreateProductoPage() {
             onClick={() => router.push("/dashboard/productos")} 
             className="px-8 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all"
           >
-            Descartar registro
+            Cancelar
           </button>
           <button 
             type="submit" 

@@ -59,7 +59,7 @@ export default function CreateRolPage() {
             onClick={() => router.back()} 
             className="flex items-center gap-2 text-indigo-600 font-bold hover:gap-3 transition-all mb-2"
           >
-            <ArrowLeft size={20} /> Volver a la lista
+            <ArrowLeft size={20} /> Volver
           </button>
           <h1 className="text-3xl font-black text-slate-800 flex items-center gap-3">
             Crear <span className="text-indigo-600">Nuevo Rol</span>
@@ -161,7 +161,7 @@ export default function CreateRolPage() {
               </>
             ) : (
               <>
-                <Save size={20} /> Crear Rol del Sistema
+                <Save size={20} /> Crear Rol
               </>
             )}
           </button>

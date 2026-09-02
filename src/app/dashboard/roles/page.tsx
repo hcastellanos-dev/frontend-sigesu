@@ -113,9 +113,9 @@ export default function RolesPage() {
           </button>
           <Link 
             href="/dashboard/roles/create" 
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all flex items-center gap-2 active:scale-95"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2 active:scale-95"
           >
-            <Plus size={20} /> Agregar Rol
+            <Plus size={20} /> Nuevo Rol
           </Link>
         </div>
       </div>

@@ -18,6 +18,14 @@ export default function RootLayout({
 
   return (
     <html lang="es">
+      <head>
+        <title>SIGESU - UPN</title>
+        <link 
+          rel="icon" 
+          type="image/svg+xml" 
+          href="https://upload.wikimedia.org/wikipedia/commons/6/60/Logo_Upn_Oficial.svg" 
+        />
+      </head>
       <body className="min-h-screen flex flex-col bg-white text-gray-900">
         {/* Solo mostramos el Header público si NO es dashboard */}
         {!isDashboard && <Header />}

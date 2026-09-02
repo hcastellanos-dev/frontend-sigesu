@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
 
   // 2. Configuración de Orígenes (Formato estricto para Red Local)
   // Probaremos pasando tanto el comodín como la IP detectada para asegurar el "match"
-  allowedDevOrigins: ["*", "172.16.5.79", "localhost:3000"],
+  allowedDevOrigins: ["*", "172.16.5.9", "localhost:3000"],
 
   // 3. Configuración de Webpack para estabilidad y memoria
   webpack: (config, { dev, isServer }) => {

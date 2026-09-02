@@ -122,7 +122,11 @@ export default function DashboardPage() {
         <StatCard title="Categorias" value={stats.categorias} icon={<Tags />} color="indigo" link="/dashboard/categorias" />
         <StatCard title="Proveedores" value={stats.proveedores} icon={<Truck />} color="orange" link="/dashboard/proveedores" />
         <StatCard title="Productos" value={stats.productos} icon={<Box />} color="violet" link="/dashboard/productos" />
-        <StatCard title="Vales de Resguardo" value={stats.vales} icon={<FileSignature />} color="emerald" link="/dashboard/vales" />
+        {(user?.rol?.nombre === 'ADMINISTRADOR' || user?.rol?.nombre === 'SISTEMAS') && (
+          <>
+          <StatCard title="Vales de Resguardo" value={stats.vales} icon={<FileSignature />} color="emerald" link="/dashboard/vales" />
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -147,7 +151,11 @@ export default function DashboardPage() {
             <StatSmall title="Categorías" value={stats.categorias} icon={<Tags />} />
             <StatCard title="Proveedores" value={stats.proveedores} icon={<Truck />} />
             <StatCard title="Productos" value={stats.productos} icon={<Box />} />
-            <StatCard title="Vales de Resguardo" value={stats.vales} icon={<FileSignature />} />
+            {(user?.rol?.nombre === 'ADMINISTRADOR' || user?.rol?.nombre === 'SISTEMAS') && (
+              <>
+              <StatCard title="Vales de Resguardo" value={stats.vales} icon={<FileSignature />} />
+              </>
+            )}
           </div>
         </div>
 

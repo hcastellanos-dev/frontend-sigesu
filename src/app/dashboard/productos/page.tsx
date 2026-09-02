@@ -22,6 +22,7 @@ export default function ProductosPage() {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [currentUser, setCurrentUser] = useState<any>(null);
   
   const [search, setSearch] = useState("");
   const [selectedCategoria, setSelectedCategoria] = useState("");
@@ -29,6 +30,26 @@ export default function ProductosPage() {
   const itemsPerPage = 10;
   
   const router = useRouter();
+
+  useEffect(() => {
+    const userStorage = localStorage.getItem("user");
+    if (userStorage) {
+      try {
+        setCurrentUser(JSON.parse(userStorage));
+      } catch (e) {
+        console.error("Error al parsear la sesión del usuario:", e);
+      }
+    }
+  }, []);
+
+  const userRole = useMemo(() => {
+    return (currentUser?.rol?.nombre || currentUser?.rol || "").toString().toUpperCase();
+  }, [currentUser]);
+
+  // Permisos según especificación
+  const canCreate = ["ADMINISTRADOR", "SISTEMAS", "SUB_ADMINISTRATIVA", "RESPONSABLE_AREA", "OPERATIVO_AREA"].includes(userRole);
+  const canEdit = ["ADMINISTRADOR", "SISTEMAS", "SUB_ADMINISTRATIVA", "RESPONSABLE_AREA"].includes(userRole);
+  const canDelete = ["ADMINISTRADOR", "SISTEMAS"].includes(userRole);
 
   const loadData = async () => {
     try {
@@ -52,8 +73,22 @@ export default function ProductosPage() {
     loadData();
   }, []);
 
+  // Filtrado de visibilidad según rol de usuario corregido
   const filteredProductos = useMemo(() => {
     return productos.filter((p: any) => {
+      const creatorRole = (p.usuario?.rol?.nombre || p.usuario?.rol || "").toString().toUpperCase();
+
+      // Regla: ADMINISTRADOR y SISTEMAS Ven TODO (no se bloquea nada)
+      if (userRole === "ADMINISTRADOR" || userRole === "SISTEMAS") {
+        // Tienen acceso global total
+      } 
+      // Regla: SUB_ADMINISTRATIVA, RESPONSABLE_AREA u OPERATIVO_AREA solo ven su ámbito
+      else if (["SUB_ADMINISTRATIVA", "RESPONSABLE_AREA", "OPERATIVO_AREA"].includes(userRole)) {
+        if (!["SUB_ADMINISTRATIVA", "RESPONSABLE_AREA", "OPERATIVO_AREA"].includes(creatorRole)) {
+          return false;
+        }
+      }
+
       const matchesSearch = 
         (p.nombre_producto || "").toLowerCase().includes(search.toLowerCase()) ||
         (p.sku || "").toLowerCase().includes(search.toLowerCase()) ||
@@ -63,7 +98,7 @@ export default function ProductosPage() {
 
       return matchesSearch && matchesCategory;
     });
-  }, [productos, search, selectedCategoria]);
+  }, [productos, search, selectedCategoria, userRole]);
 
   const totalPages = Math.ceil(filteredProductos.length / itemsPerPage);
   const paginatedData = useMemo(() => {
@@ -72,6 +107,7 @@ export default function ProductosPage() {
   }, [filteredProductos, currentPage]);
 
   const handleDelete = async (id: number) => {
+    if (!canDelete) return alert("No tiene permisos para eliminar productos.");
     if (!confirm("¿Estás seguro de eliminar este producto?")) return;
     try {
       await api.delete(`/productos/${id}`);
@@ -82,9 +118,7 @@ export default function ProductosPage() {
   };
 
   const exportToExcel = () => {
-    // --- CÓDIGO NUEVO: Verificación de datos antes de exportar ---
     if (filteredProductos.length === 0) return alert("No hay datos para exportar");
-    // -------------------------------------------------------------
 
     const dataToExport = filteredProductos.map((p: any) => ({
       "ID": p.id_producto,
@@ -107,7 +141,9 @@ export default function ProductosPage() {
       "COMPOSICIÓN": p.composicion || "OTROS",
       "ESTATUS MOVIMIENTO": p.area_movimiento || "ALTA",
       "ESTADO LÓGICO": p.estado || "ACTIVO",
-      "FECHA CREACIÓN": p.fecha_creacion ? new Date(p.fecha_creacion).toLocaleDateString() : "N/A", // --- CÓDIGO NUEVO: Validación de fecha ---
+      "CREADO POR": p.usuario?.nombre || "N/A",
+      "ROL CREADOR": p.usuario?.rol?.nombre || "N/A",
+      "FECHA CREACIÓN": p.fecha_creacion ? new Date(p.fecha_creacion).toLocaleDateString() : "N/A",
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
@@ -146,12 +182,15 @@ export default function ProductosPage() {
           >
             <FileSpreadsheet size={20} /> Exportar Excel
           </button>
-          <Link 
-            href="/dashboard/productos/create" 
-            className="flex-1 md:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2 active:scale-95"
+          
+          {canCreate && (
+            <Link 
+              href="/dashboard/productos/create" 
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2 active:scale-95"
           >
-            <Plus size={20} /> Nuevo Producto
-          </Link>
+              <Plus size={20} /> Nuevo Producto
+            </Link>
+          )}
         </div>
       </div>
 
@@ -258,8 +297,8 @@ export default function ProductosPage() {
             },
           ]}
           data={paginatedData}
-          onEdit={(item) => router.push(`/dashboard/productos/edit/${item.id_producto}`)}
-          onDelete={(item) => handleDelete(item.id_producto)}
+          onEdit={canEdit ? (item) => router.push(`/dashboard/productos/edit/${item.id_producto}`) : undefined}
+          onDelete={canDelete ? (item) => handleDelete(item.id_producto) : undefined}
         />
         
         {error && (

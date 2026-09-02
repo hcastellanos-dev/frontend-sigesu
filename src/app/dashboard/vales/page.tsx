@@ -206,8 +206,10 @@ export default function ValesPage() {
           <button onClick={exportToExcel} className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold shadow-lg shadow-emerald-100 transition-all flex items-center gap-2 active:scale-95">
             <FileSpreadsheet size={20} /> Exportar Excel
           </button>
-          <Link href="/dashboard/vales/create" className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all flex items-center gap-2 active:scale-95">
-            <Plus size={20} /> Generar Vale
+          <Link href="/dashboard/vales/create" 
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2 active:scale-95"
+          >
+            <Plus size={20} /> Nuevo Vale
           </Link>
         </div>
       </div>

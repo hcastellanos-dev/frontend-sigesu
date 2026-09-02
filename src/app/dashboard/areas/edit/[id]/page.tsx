@@ -96,7 +96,7 @@ export default function EditAreaPage({ params }: { params: Promise<{ id: string 
             onClick={() => router.back()} 
             className="flex items-center gap-2 text-indigo-600 font-bold hover:gap-3 transition-all mb-2"
           >
-            <ArrowLeft size={20} /> Volver a Áreas
+            <ArrowLeft size={20} /> Volver
           </button>
           <h1 className="text-3xl font-black text-slate-800 flex items-center gap-3">
             Editar Área: <span className="text-indigo-600">{formData.nombre}</span>
@@ -177,7 +177,7 @@ export default function EditAreaPage({ params }: { params: Promise<{ id: string 
             onClick={() => router.push("/dashboard/areas")} 
             className="px-8 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all"
           >
-            Descartar
+            Cancelar
           </button>
           <button 
             type="submit" 

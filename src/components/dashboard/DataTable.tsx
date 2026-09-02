@@ -40,7 +40,21 @@ export default function DataTable({ columns, data, onEdit, onDelete, extraAction
         <tbody className="divide-y divide-slate-100">
           {data.length > 0 ? (
             data.map((row, index) => {
-              const rowId = row.groupKey || row.id_usuario || row.id_rol || row.id || index;
+              // Priorizamos los IDs primarios específicos del modelo para evitar colisiones por llaves foráneas comunes (como id_usuario)
+              const primaryId = 
+                row.id_producto ?? 
+                row.id_vale ?? 
+                row.id_area ?? 
+                row.id_edificio ?? 
+                row.id_categoria ?? 
+                row.id_proveedor ?? 
+                row.id_bitacora ?? 
+                row.id_usuario ?? 
+                row.id_rol ?? 
+                row.id ?? 
+                row.groupKey;
+
+              const rowId = primaryId !== undefined && primaryId !== null ? `row-${primaryId}-${index}` : `row-${index}`;
 
               return (
                 <tr key={rowId} className="hover:bg-slate-50/50 transition-colors">
@@ -85,7 +99,7 @@ export default function DataTable({ columns, data, onEdit, onDelete, extraAction
             })
           ) : (
             <tr>
-              <td colSpan={columns.length + 1} className="p-10 text-center text-slate-400 italic font-medium">
+              <td colSpan={columns.length + (onEdit || onDelete || extraActions ? 1 : 0)} className="p-10 text-center text-slate-400 italic font-medium">
                 No hay datos disponibles para mostrar.
               </td>
             </tr>
