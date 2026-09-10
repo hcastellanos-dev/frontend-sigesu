@@ -4,8 +4,8 @@ import React, { useEffect, useState, useCallback, cloneElement } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/services/api";
 import { 
-  Users, Package, Building, Map, Tags, Building2, MapPin, Box, FileSignature, 
-  Truck, FileText, ShieldCheck, LayoutDashboard, 
+  Users, Building, Tags, Building2, MapPin, Box, FileSignature, 
+  Truck, ShieldCheck, LayoutDashboard, 
   AlertCircle, ArrowRight, History, Calendar, MessageSquare
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,6 +22,10 @@ export default function DashboardPage() {
 
   const { user } = useAuth();
   
+  // Extracción segura del rol y del ID de usuario
+  const userRole = user?.rol?.nombre || (typeof user?.rol === 'string' ? user?.rol : '') || '';
+  const userId = user?.id_usuario || user?.id;
+
   const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true);
@@ -32,10 +36,17 @@ export default function DashboardPage() {
           const res = await api.get(url);
           return Array.isArray(res.data) ? res.data.length : 0;
         } catch (e) {
-          console.warn(`No se pudo obtener conteo de ${url}`);
           return 0;
         }
       };
+
+      // Si no es ADMINISTRADOR o SISTEMAS, pasamos explícitamente el id_usuario en los query params
+      const normalizedRole = userRole.toUpperCase().trim();
+      const isGlobal = ['ADMINISTRADOR', 'SISTEMAS'].includes(normalizedRole);
+      
+      const productosUrl = (isGlobal || !userId) 
+        ? "/productos" 
+        : `/productos?userId=${userId}`;
 
       const [
         roles, usuarios, edificios, areas, 
@@ -47,7 +58,7 @@ export default function DashboardPage() {
         fetchCount("/areas"),
         fetchCount("/categorias"),
         fetchCount("/proveedores"),
-        fetchCount("/productos"),
+        fetchCount(productosUrl),
         fetchCount("/vales"),
         api.get("/bitacoras").catch(() => ({ data: [] }))
       ]);
@@ -64,7 +75,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userRole, userId]);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -72,9 +83,10 @@ export default function DashboardPage() {
       router.push("/login");
       return;
     }
-
-    loadDashboardData();
-  }, [router, loadDashboardData]);
+    if (user) {
+      loadDashboardData();
+    }
+  }, [router, user, loadDashboardData]);
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center p-20 space-y-4">
@@ -83,9 +95,11 @@ export default function DashboardPage() {
     </div>
   );
 
+  const isAdminOrSystems = ['ADMINISTRADOR', 'SISTEMAS'].includes(userRole.toUpperCase());
+  const canSeeVales = ['ADMINISTRADOR', 'SISTEMAS', 'DIRECCION', 'SUB_ACADEMICA'].includes(userRole.toUpperCase());
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-10">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-4xl font-black text-slate-800 tracking-tight flex items-center gap-3">
@@ -105,27 +119,24 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Grid de tarjetas principales */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {(user?.rol?.nombre === 'ADMINISTRADOR') && (
+        {userRole === 'ADMINISTRADOR' && (
           <>
-          <StatCard title="Roles" value={stats.roles} icon={<ShieldCheck />} color="sky" link="/dashboard/roles" />
-          <StatCard title="Usuarios" value={stats.usuarios} icon={<Users />} color="blue" link="/dashboard/usuarios" />
+            <StatCard title="Roles" value={stats.roles} icon={<ShieldCheck />} color="sky" link="/dashboard/roles" />
+            <StatCard title="Usuarios" value={stats.usuarios} icon={<Users />} color="blue" link="/dashboard/usuarios" />
           </>
         )}
-        {(user?.rol?.nombre === 'ADMINISTRADOR' || user?.rol?.nombre === 'SISTEMAS') && (
+        {isAdminOrSystems && (
           <>
-          <StatCard title="Edificios" value={stats.edificios} icon={<Building2 />} color="amber" link="/dashboard/edificios" />
-          <StatCard title="Areas" value={stats.areas} icon={<MapPin />} color="rose" link="/dashboard/areas" />
+            <StatCard title="Edificios" value={stats.edificios} icon={<Building2 />} color="amber" link="/dashboard/edificios" />
+            <StatCard title="Areas" value={stats.areas} icon={<MapPin />} color="rose" link="/dashboard/areas" />
           </>
         )}
         <StatCard title="Categorias" value={stats.categorias} icon={<Tags />} color="indigo" link="/dashboard/categorias" />
         <StatCard title="Proveedores" value={stats.proveedores} icon={<Truck />} color="orange" link="/dashboard/proveedores" />
         <StatCard title="Productos" value={stats.productos} icon={<Box />} color="violet" link="/dashboard/productos" />
-        {(user?.rol?.nombre === 'ADMINISTRADOR' || user?.rol?.nombre === 'SISTEMAS') && (
-          <>
+        {canSeeVales && (
           <StatCard title="Vales de Resguardo" value={stats.vales} icon={<FileSignature />} color="emerald" link="/dashboard/vales" />
-          </>
         )}
       </div>
 
@@ -136,25 +147,23 @@ export default function DashboardPage() {
             <h2 className="font-black text-slate-500 uppercase tracking-widest text-xs">Infraestructura</h2>
           </div>
           <div className="grid grid-cols-1 gap-4">
-            {(user?.rol?.nombre === 'ADMINISTRADOR') && (
+            {userRole === 'ADMINISTRADOR' && (
               <>
-              <StatSmall title="Roles" value={stats.roles} icon={<ShieldCheck />} />
-              <StatSmall title="Usuarios" value={stats.usuarios} icon={<Users />} />
+                <StatSmall title="Roles" value={stats.roles} icon={<ShieldCheck />} />
+                <StatSmall title="Usuarios" value={stats.usuarios} icon={<Users />} />
               </>
             )}
-            {(user?.rol?.nombre === 'ADMINISTRADOR' || user?.rol?.nombre === 'SISTEMAS') && (
+            {isAdminOrSystems && (
               <>
-              <StatSmall title="Edificios" value={stats.edificios} icon={<Building2 />} />
-              <StatSmall title="Areas" value={stats.areas} icon={<MapPin />} />
+                <StatSmall title="Edificios" value={stats.edificios} icon={<Building2 />} />
+                <StatSmall title="Areas" value={stats.areas} icon={<MapPin />} />
               </>
             )}
             <StatSmall title="Categorías" value={stats.categorias} icon={<Tags />} />
-            <StatCard title="Proveedores" value={stats.proveedores} icon={<Truck />} />
-            <StatCard title="Productos" value={stats.productos} icon={<Box />} />
-            {(user?.rol?.nombre === 'ADMINISTRADOR' || user?.rol?.nombre === 'SISTEMAS') && (
-              <>
-              <StatCard title="Vales de Resguardo" value={stats.vales} icon={<FileSignature />} />
-              </>
+            <StatSmall title="Proveedores" value={stats.proveedores} icon={<Truck />} />
+            <StatSmall title="Productos" value={stats.productos} icon={<Box />} />
+            {canSeeVales && (
+              <StatSmall title="Vales de Resguardo" value={stats.vales} icon={<FileSignature />} />
             )}
           </div>
         </div>
@@ -207,30 +216,19 @@ function StatCard({ title, value, icon, color, link }: any) {
     violet: "text-violet-600 bg-violet-50 border-violet-100"
   };
 
-  const colorClasses = theme[color] || theme.indigo;
-
   return (
     <div 
-      onClick={() => router.push(link)}
+      onClick={() => link && router.push(link)}
       className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm transition-all cursor-pointer group hover:border-indigo-300 active:scale-95 flex items-center gap-4"
     >
-      <div className={`p-3 rounded-xl flex-shrink-0 ${colorClasses} group-hover:scale-110 transition-transform`}>
+      <div className={`p-3 rounded-xl flex-shrink-0 ${theme[color] || theme.indigo} group-hover:scale-110 transition-transform`}>
         {cloneElement(icon, { size: 20 })}
       </div>
-      
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider truncate">
-          {title}
-        </p>
-        <p className="text-xl font-black text-slate-800 leading-none mt-0.5">
-          {value}
-        </p>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider truncate">{title}</p>
+        <p className="text-xl font-black text-slate-800 leading-none mt-0.5">{value}</p>
       </div>
-      
-      <ArrowRight 
-        size={16} 
-        className="text-slate-200 group-hover:text-slate-400 group-hover:translate-x-1 transition-all flex-shrink-0" 
-      />
+      {link && <ArrowRight size={16} className="text-slate-200 group-hover:text-slate-400 group-hover:translate-x-1 transition-all flex-shrink-0" />}
     </div>
   );
 }
