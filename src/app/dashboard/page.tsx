@@ -22,9 +22,9 @@ export default function DashboardPage() {
 
   const { user } = useAuth();
   
-  // Extracción segura del rol y del ID de usuario
+  // Extracción segura del rol y del ID de usuario con casteo para evitar errores de compilación
   const userRole = user?.rol?.nombre || (typeof user?.rol === 'string' ? user?.rol : '') || '';
-  const userId = user?.id_usuario || user?.id;
+  const userId = (user as any)?.id_usuario || (user as any)?.id;
 
   const loadDashboardData = useCallback(async () => {
     try {
